@@ -41,6 +41,7 @@ async function run() {
     await client.connect();
 
     const productsCollections = client.db('borak').collection('products')
+    const orderCollections = client.db('borak').collection('orders')
 
     // Create JWT
 app.post('/login', async (req, res) => {
@@ -63,6 +64,14 @@ app.post('/login', async (req, res) => {
       const query = {_id: ObjectId(id)}
       const tool = await productsCollections.findOne(query);
       res.send(tool)
+    })
+
+    // Store order
+    app.post('/order', async (req, res) => {
+      const data = req.body;
+      console.log(data)
+      const result = await orderCollections.insertOne(data);
+      res.send(result)
     })
 
   }
