@@ -69,10 +69,22 @@ app.post('/login', async (req, res) => {
     // Store order
     app.post('/order', async (req, res) => {
       const data = req.body;
-      console.log(data)
       const result = await orderCollections.insertOne(data);
       res.send(result)
     })
+
+       // My orders
+       app.get('/my-orders', VerifyUser, async (req, res) => {
+        const email = req.query.email;
+        const tokenEmail = req.decoded.email;
+        if(tokenEmail === email) {
+        const query = {email: email}
+        const appointment = await orderCollections.find(query).toArray();
+        res.send(appointment)
+      } else {
+        return res.status(403).send({Message: 'Forbidden'})
+      }
+      }) 
 
   }
   finally {
