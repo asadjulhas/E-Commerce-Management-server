@@ -4,7 +4,11 @@ const cors = require("cors");
 require("dotenv").config();
 var jwt = require("jsonwebtoken");
 
-const port = process.env.PORT || 5000;
+const port = process.env.PORT || 4000;
+
+
+// For Payment
+const stripe = require("stripe")(process.env.STRIPE_SECRATE_KEY);
 
 const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 
@@ -42,6 +46,28 @@ async function run() {
     const productsCollections = client.db("borak").collection("products");
     const orderCollections = client.db("borak").collection("orders");
     const userCollections = client.db("borak").collection("users");
+    const paymentCollections = client.db("borak").collection("payments");
+
+// Payment function
+
+app.post("/create-payment-intent", VerifyUser, async (req, res) => {
+  const service  = req.body;
+  const price = service.amount;
+  const amount = price * 100;
+  const paymentIntent = await stripe.paymentIntents.create({
+    amount: amount,
+    currency: "usd",
+    automatic_payment_methods: {
+      enabled: true,
+    },
+  });
+
+  res.send({
+    clientSecret: paymentIntent.client_secret,
+  });
+
+
+})
 
     // Create JWT
     app.post("/login", async (req, res) => {
@@ -56,8 +82,6 @@ async function run() {
         app.put('/user/:email', async (req, res) => {
           const email = req.params.email;
           const user = req.body;
-          console.log('email:', email)
-          console.log('info:', user)
           const query = {email: email};
           const options = { upsert: true };
           const updateDoc = {
@@ -113,6 +137,28 @@ async function run() {
       const result = await orderCollections.deleteOne(query);
       res.send(result);
     });
+
+      // Find a order
+      app.get('/order/:id', VerifyUser, async (req, res) => {
+        const id = req.params.id;
+        const query = {_id: ObjectId(id)}
+        const result = await orderCollections.findOne(query);
+        res.send(result)
+      })
+
+      // Update payment status for booking
+app.put('/payment/:id', VerifyUser, async (req, res) => {
+  const id = req.params.id;
+  const paymentIntent = req.body;
+  const query = {_id: ObjectId(id)};
+  const updateDoc = {
+    $set: {payment: true, transactionId: paymentIntent.paymentIntent.id}
+  };
+  const result = await orderCollections.updateOne(query, updateDoc);
+  const setPayment = await paymentCollections.insertOne(paymentIntent.paymentIntent);
+  res.send({result})
+
+})
 
 
 
