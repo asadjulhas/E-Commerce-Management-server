@@ -6,7 +6,6 @@ var jwt = require("jsonwebtoken");
 
 const port = process.env.PORT || 5000;
 
-
 // For Payment
 const stripe = require("stripe")(process.env.STRIPE_SECRATE_KEY);
 
@@ -49,26 +48,24 @@ async function run() {
     const paymentCollections = client.db("borak").collection("payments");
     const reviewCollections = client.db("borak").collection("reviews");
 
-// Payment function
+    // Payment function
 
-app.post("/create-payment-intent", VerifyUser, async (req, res) => {
-  const service  = req.body;
-  const price = service.amount;
-  const amount = price * 100;
-  const paymentIntent = await stripe.paymentIntents.create({
-    amount: amount,
-    currency: "usd",
-    automatic_payment_methods: {
-      enabled: true,
-    },
-  });
+    app.post("/create-payment-intent", VerifyUser, async (req, res) => {
+      const service = req.body;
+      const price = service.amount;
+      const amount = price * 100;
+      const paymentIntent = await stripe.paymentIntents.create({
+        amount: amount,
+        currency: "usd",
+        automatic_payment_methods: {
+          enabled: true,
+        },
+      });
 
-  res.send({
-    clientSecret: paymentIntent.client_secret,
-  });
-
-
-})
+      res.send({
+        clientSecret: paymentIntent.client_secret,
+      });
+    });
 
     // Create JWT
     app.post("/login", async (req, res) => {
@@ -79,23 +76,21 @@ app.post("/create-payment-intent", VerifyUser, async (req, res) => {
       res.send({ accessToken });
     });
 
-        // Add/update user
-        app.put('/user/:email', async (req, res) => {
-          const email = req.params.email;
-          const user = req.body;
-          const query = {email: email};
-          const options = { upsert: true };
-          const updateDoc = {
-            $set: user
-          };
-          const result = userCollections.updateOne(query, updateDoc, options);
-         const accessToken = jwt.sign({ email }, process.env.JWT, {
-           expiresIn: '1d'
-         });
-          res.send({accessToken})
-    
-        })
-
+    // Add/update user
+    app.put("/user/:email", async (req, res) => {
+      const email = req.params.email;
+      const user = req.body;
+      const query = { email: email };
+      const options = { upsert: true };
+      const updateDoc = {
+        $set: user,
+      };
+      const result = userCollections.updateOne(query, updateDoc, options);
+      const accessToken = jwt.sign({ email }, process.env.JWT, {
+        expiresIn: "1d",
+      });
+      res.send({ accessToken });
+    });
 
     // Get all products
     app.get("/product", async (req, res) => {
@@ -139,42 +134,41 @@ app.post("/create-payment-intent", VerifyUser, async (req, res) => {
       res.send(result);
     });
 
-      // Find a order
-      app.get('/order/:id', VerifyUser, async (req, res) => {
-        const id = req.params.id;
-        const query = {_id: ObjectId(id)}
-        const result = await orderCollections.findOne(query);
-        res.send(result)
-      })
+    // Find a order
+    app.get("/order/:id", VerifyUser, async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: ObjectId(id) };
+      const result = await orderCollections.findOne(query);
+      res.send(result);
+    });
 
-      // Update payment status for booking
-app.put('/payment/:id', VerifyUser, async (req, res) => {
-  const id = req.params.id;
-  const paymentIntent = req.body;
-  const query = {_id: ObjectId(id)};
-  const updateDoc = {
-    $set: {payment: true, transactionId: paymentIntent.paymentIntent.id}
-  };
-  const result = await orderCollections.updateOne(query, updateDoc);
-  const setPayment = await paymentCollections.insertOne(paymentIntent.paymentIntent);
-  res.send({result})
+    // Update payment status for booking
+    app.put("/payment/:id", VerifyUser, async (req, res) => {
+      const id = req.params.id;
+      const paymentIntent = req.body;
+      const query = { _id: ObjectId(id) };
+      const updateDoc = {
+        $set: { payment: true, transactionId: paymentIntent.paymentIntent.id },
+      };
+      const result = await orderCollections.updateOne(query, updateDoc);
+      const setPayment = await paymentCollections.insertOne(
+        paymentIntent.paymentIntent
+      );
+      res.send({ result });
+    });
 
-})
+    // Add Review
+    app.post("/review", VerifyUser, async (req, res) => {
+      const review = req.body;
+      const result = await reviewCollections.insertOne(review);
+      res.send(result);
+    });
 
- // Add Review
- app.post('/review', VerifyUser, async (req, res) => {
-  const review = req.body;
-    const result = await reviewCollections.insertOne(review);
-    res.send(result)
-})
-
- // Gel all Review
- app.get('/reviews', async (req, res) => {
-    const result = await reviewCollections.find().toArray();
-    res.send(result)
-})
-
-
+    // Gel all Review
+    app.get("/reviews", async (req, res) => {
+      const result = await reviewCollections.find().toArray();
+      res.send(result);
+    });
   } finally {
     // await client.close()
   }
