@@ -41,6 +41,7 @@ async function run() {
 
     const productsCollections = client.db("borak").collection("products");
     const orderCollections = client.db("borak").collection("orders");
+    const userCollections = client.db("borak").collection("users");
 
     // Create JWT
     app.post("/login", async (req, res) => {
@@ -50,6 +51,26 @@ async function run() {
       });
       res.send({ accessToken });
     });
+
+        // Add/update user
+        app.put('/user/:email', async (req, res) => {
+          const email = req.params.email;
+          const user = req.body;
+          console.log('email:', email)
+          console.log('info:', user)
+          const query = {email: email};
+          const options = { upsert: true };
+          const updateDoc = {
+            $set: user
+          };
+          const result = userCollections.updateOne(query, updateDoc, options);
+         const accessToken = jwt.sign({ email }, process.env.JWT, {
+           expiresIn: '1d'
+         });
+          res.send({accessToken})
+    
+        })
+
 
     // Get all products
     app.get("/product", async (req, res) => {
@@ -96,7 +117,7 @@ async function run() {
 
 
 
-    
+
   } finally {
     // await client.close()
   }
