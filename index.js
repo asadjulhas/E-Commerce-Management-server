@@ -47,6 +47,7 @@ async function run() {
     const orderCollections = client.db("borak").collection("orders");
     const userCollections = client.db("borak").collection("users");
     const paymentCollections = client.db("borak").collection("payments");
+    const reviewCollections = client.db("borak").collection("reviews");
 
 // Payment function
 
@@ -158,6 +159,19 @@ app.put('/payment/:id', VerifyUser, async (req, res) => {
   const setPayment = await paymentCollections.insertOne(paymentIntent.paymentIntent);
   res.send({result})
 
+})
+
+ // Add Review
+ app.post('/review', VerifyUser, async (req, res) => {
+  const review = req.body;
+    const result = await reviewCollections.insertOne(review);
+    res.send(result)
+})
+
+ // Gel all Review
+ app.get('/reviews', async (req, res) => {
+    const result = await reviewCollections.find().toArray();
+    res.send(result)
 })
 
 
