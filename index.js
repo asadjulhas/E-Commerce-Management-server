@@ -4,7 +4,7 @@ const cors = require("cors");
 require("dotenv").config();
 var jwt = require("jsonwebtoken");
 
-const port = process.env.PORT || 4000;
+const port = process.env.PORT || 5000;
 
 
 // For Payment
@@ -159,9 +159,6 @@ app.put('/payment/:id', VerifyUser, async (req, res) => {
   res.send({result})
 
 })
-
-
-
 
 
   } finally {
