@@ -203,12 +203,51 @@ app.post("/update-profile", VerifyUser, async (req, res) => {
 });
 
 
+// Check admin
 app.get('/check-admin/:email', VerifyUser, async (req, res) => {
   const email = req.params.email;
   const Query = {email: email, role: 'admin'}
   const checkAdmin = await userCollections.findOne(Query);
   res.send(checkAdmin)
 })
+
+ // Get all user
+ app.get('/all-users', VerifyUser, verifyAdmin, async (req, res) => {
+  const query = {};
+  const allUsers = await userCollections.find(query).toArray();
+  res.send(allUsers);
+})
+
+  // Remove Admin 
+  app.put('/remove-admin/:email', VerifyUser, verifyAdmin, async (req, res) => {
+    const email = req.params.email;
+    const query = {email: email};
+    const updateDoc = {
+      $set: {role: ''}
+    };
+    const result = await userCollections.updateOne(query, updateDoc);
+    res.send({result})
+  })
+
+      // Make Admin 
+      app.put('/admin/:email', VerifyUser, verifyAdmin, async (req, res) => {
+        const email = req.params.email;
+          const query = {email: email};
+        const updateDoc = {
+          $set: {role: 'admin'}
+        };
+        const result = await userCollections.updateOne(query, updateDoc);
+        res.send({result})
+        
+      })
+
+        // Add Product
+    app.post('/product', VerifyUser, verifyAdmin, async (req, res) => {
+      const data = req.body;
+      console.log(data)
+      //  const result = await productsCollections.insertOne(data);
+      //  res.send(result)
+    })
 
 
 
