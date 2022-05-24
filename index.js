@@ -48,6 +48,18 @@ async function run() {
     const paymentCollections = client.db("borak").collection("payments");
     const reviewCollections = client.db("borak").collection("reviews");
 
+        // Verify admin
+        const verifyAdmin = async (req, res, next) => {
+          const tokenEmail = req.decoded.email;
+            const tokenQuery = {email: tokenEmail, role: 'admin'}
+            const checkAdmin = await userCollections.findOne(tokenQuery);
+            if(checkAdmin) { 
+              next();
+            } else {
+              res.send({message: 'You dont have admin access bro'})
+            }
+          }
+
     // Payment function
 
     app.post("/create-payment-intent", VerifyUser, async (req, res) => {
@@ -189,6 +201,15 @@ app.post("/update-profile", VerifyUser, async (req, res) => {
   const result = await userCollections.findOne(query);
   res.send(result);
 });
+
+
+app.get('/check-admin/:email', VerifyUser, async (req, res) => {
+  const email = req.params.email;
+  const Query = {email: email, role: 'admin'}
+  const checkAdmin = await userCollections.findOne(Query);
+  res.send(checkAdmin)
+})
+
 
 
   } finally {
