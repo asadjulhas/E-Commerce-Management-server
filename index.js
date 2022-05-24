@@ -244,9 +244,8 @@ app.get('/check-admin/:email', VerifyUser, async (req, res) => {
         // Add Product
     app.post('/product', VerifyUser, verifyAdmin, async (req, res) => {
       const data = req.body;
-      console.log(data)
-      //  const result = await productsCollections.insertOne(data);
-      //  res.send(result)
+       const result = await productsCollections.insertOne(data);
+       res.send(result)
     })
 
 
