@@ -85,7 +85,7 @@ async function run() {
       const updateDoc = {
         $set: user,
       };
-      const result = userCollections.updateOne(query, updateDoc, options);
+      const result = await userCollections.updateOne(query, updateDoc, options);
       const accessToken = jwt.sign({ email }, process.env.JWT, {
         expiresIn: "1d",
       });
@@ -169,6 +169,28 @@ async function run() {
       const result = await reviewCollections.find().toArray();
       res.send(result);
     });
+
+// Update user profile
+app.post("/update-profile", VerifyUser, async (req, res) => {
+  const data = req.body; 
+  const query = {email: data.email};
+  const updateDoc = {
+    $set: {phone: data.phone, address: data.address, linkedin: data.linkedin}
+  };
+  const result = await userCollections.updateOne(query, updateDoc);
+  res.send(result);
+});
+
+
+ // Get a user
+ app.get("/user/:email", VerifyUser, async (req, res) => {
+  const email = req.params.email;
+  const query = {email: email};
+  const result = await userCollections.findOne(query);
+  res.send(result);
+});
+
+
   } finally {
     // await client.close()
   }
