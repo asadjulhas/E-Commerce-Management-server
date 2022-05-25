@@ -256,6 +256,17 @@ app.get('/check-admin/:email', VerifyUser, async (req, res) => {
       });
 
 
+    // Update status for shipped 
+    app.put("/status/:id", VerifyUser, verifyAdmin, async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: ObjectId(id) };
+      const updateDoc = {
+        $set: { status: 'shipped'},
+      };
+      const result = await orderCollections.updateOne(query, updateDoc);
+      res.send(result);
+    });
+
 
 
   } finally {
