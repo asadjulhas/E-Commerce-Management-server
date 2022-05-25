@@ -248,6 +248,14 @@ app.get('/check-admin/:email', VerifyUser, async (req, res) => {
        res.send(result)
     })
 
+       // Get all orders
+       app.get("/orders", VerifyUser, verifyAdmin, async (req, res) => {
+          const query = {};
+          const orders = await orderCollections.find(query).toArray();
+          res.send(orders);
+      });
+
+
 
 
   } finally {
