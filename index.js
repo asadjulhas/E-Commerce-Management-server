@@ -4,7 +4,7 @@ const cors = require("cors");
 require("dotenv").config();
 var jwt = require("jsonwebtoken");
 
-const port = process.env.PORT || 5000;
+const port = process.env.PORT || 4000;
 
 // For Payment
 const stripe = require("stripe")(process.env.STRIPE_SECRATE_KEY);
@@ -40,7 +40,7 @@ const client = new MongoClient(uri, {
 
 async function run() {
   try {
-    await client.connect();
+    // await client.connect();
 
     const productsCollections = client.db("borak").collection("products");
     const orderCollections = client.db("borak").collection("orders");
@@ -56,7 +56,7 @@ async function run() {
       if (checkAdmin) {
         next();
       } else {
-        res.send({ message: "You dont have admin access bro" });
+        res.send({ message: "You don't have admin access bro" });
       }
     };
 
