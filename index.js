@@ -40,7 +40,7 @@ const client = new MongoClient(uri, {
 
 async function run() {
   try {
-    // await client.connect();
+    await client.connect();
 
     const productsCollections = client.db("borak").collection("products");
     const orderCollections = client.db("borak").collection("orders");
