@@ -4,7 +4,7 @@ const cors = require("cors");
 require("dotenv").config();
 var jwt = require("jsonwebtoken");
 
-const port = process.env.PORT || 4000;
+const port = process.env.PORT || 5000;
 
 // For Payment
 const stripe = require("stripe")(process.env.STRIPE_SECRATE_KEY);
